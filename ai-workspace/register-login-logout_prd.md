@@ -1,11 +1,11 @@
 Date created: 2026-08-28
-Date last modified: 2026-08-28 (Phase 1 complete)
+Date last modified: 2026-08-28 (Phase 1 complete, awaiting review)
 
 # Register, Login, and Logout - Technical PRD
 
 ## Overview/Problem
 
-QuizMaker is a greenfield app for multiple teachers who will later collaborate on a shared bank of multiple-choice questions. There is no application identity yet: no user records, no way to register, and no way to sign in or out. This first phase only solves identity so more than one teacher can have an account. Question-bank (MCQ) features are not part of this phase.
+QuizMaker is a greenfield app for multiple teachers who will later collaborate on a shared bank of multiple-choice questions. There is no application identity yet that this phase is meant to define: teachers need user records, a way to register, and a way to sign in and out. This first phase only solves identity so more than one teacher can have an account. Question-bank (MCQ) features are not part of this phase.
 
 ---
 
@@ -52,15 +52,13 @@ We believe that a simple hashed-password register, login, and logout flow will l
 
 ## Testing Approach (TDD)
 
-Vitest is the project unit-testing framework (see `.cursor/skills/testing/SKILL.md`). It is not installed yet. Install it the first time tests are needed, with the user's approval (given in this PRD):
+Vitest is the project unit-testing framework (see `.cursor/skills/testing/SKILL.md`). It is already installed (`npm run test`, `npm run test:watch`, `vitest.config.ts`). The first-time install used:
 
 ```bash
 npm install -D vitest@3 @vitejs/plugin-react@4 @testing-library/react @testing-library/user-event jsdom vite-tsconfig-paths
 ```
 
 Pin `@vitejs/plugin-react` to v4: latest v6 pulls Babel 8 and conflicts with this repo's Babel 7 tree.
-
-Add `vitest.config.ts` (jsdom, `globals: true`, `vite-tsconfig-paths` for `@/`), and scripts `"test": "vitest run"` and `"test:watch": "vitest"`.
 
 **Red → green for every phase:**
 
@@ -84,7 +82,7 @@ Add `vitest.config.ts` (jsdom, `globals: true`, `vite-tsconfig-paths` for `@/`),
 
 ### Database Schema
 
-Cloudflare D1 is not configured yet. Implementation must create a D1 database, bind it as `DB` in `wrangler.jsonc`, run `npm run cf-typegen`, and add a local-only migration. Do not apply migrations with `--remote`.
+D1 is bound as `DB` in `wrangler.jsonc` (`database_name`: `quizmaker`). Implementation uses a local-only migration for `users`. Do not apply migrations with `--remote`. Do not create a second D1 database if this binding already exists.
 
 ```sql
 CREATE TABLE users (
@@ -231,7 +229,7 @@ TDD is required in every phase: listed tests first (red), then implementation (g
 
 ### Phase 1: Database and user service - COMPLETED
 
-**Objective**: Vitest harness exists; D1 exists locally; `users` is migrated; the user service can create, update, delete, and look up users.
+**Objective**: Vitest harness exists; D1 `users` is migrated locally; the user service can create, update, delete, and look up users.
 
 **TDD — tests to write first (expect red):**
 
@@ -250,21 +248,20 @@ Mock `@opennextjs/cloudflare` and a fake D1 (`prepare` / `bind` / `all` / `run`)
 
 **Tasks**:
 
-1. Install Vitest and related packages; add `vitest.config.ts` and `test` / `test:watch` scripts
+1. Confirm Vitest config and `test` / `test:watch` scripts (already present); do not add other test runners
 2. Write the Phase 1 tests above; confirm `npm run test` is red
 3. Implement `src/lib/password.ts` until password tests are green
-4. Create D1 (`npx wrangler d1 create` — name aligned with `quizmaker`) and add `d1_databases` binding `DB` in `wrangler.jsonc`
-5. Run `npm run cf-typegen`
-6. Create a migration for `users` and apply **locally only**
-7. Implement `src/lib/services/user-service.ts` (prepared statements, `?1` placeholders, no `first()`) until user-service tests are green
-8. Add empty placeholders to `.dev.vars.example` if any new vars are introduced (none expected for D1 beyond the binding)
+4. Confirm the existing `DB` binding in `wrangler.jsonc`; run `npm run cf-typegen` if types are stale
+5. Create a migration for `users` if missing and apply **locally only**
+6. Implement `src/lib/services/user-service.ts` (prepared statements, `?1` placeholders, no `first()`) until user-service tests are green
+7. Add empty placeholders to `.dev.vars.example` if any new vars are introduced (none expected for D1 beyond the binding)
 
 **Phase 1 gate:** `npm run test` green for Phase 1 files; D1 migrated locally; user service implemented.
 
 **Deliverables**:
 
 - Vitest config and npm test scripts
-- `wrangler.jsonc` D1 binding
+- `wrangler.jsonc` D1 binding (already present; keep `DB`)
 - `migrations/` SQL for `users`
 - `src/lib/password.ts` and colocated tests
 - User service with create, update, delete, and get-by-username, plus colocated tests
@@ -333,7 +330,7 @@ Mock `fetch` and the Next.js router (`next/navigation`). Use Testing Library + `
 3. Wire pages at `/register`, `/login`, `/mcqs`; home links to register/login
 4. `/mcqs` stub copy only — no MCQ CRUD
 5. Browser verification of happy path and error paths (register, login, logout, duplicate, validation)
-6. Confirm the full Vitest suite stays green
+6. Confirm the full Vitest suite stays green; `npm run lint` and `npm run build` succeed
 
 **Phase 3 gate:** `npm run test` green for all phases; browser pass; `npm run lint` and `npm run build` succeed.
 
@@ -352,14 +349,14 @@ Mock `fetch` and the Next.js router (`next/navigation`). Use Testing Library + `
 - `vitest.config.ts` — Vitest + jsdom + `@/` paths
 - `wrangler.jsonc` — D1 `DB` binding
 - `migrations/` — `users` table
-- `src/lib/password.ts` / `src/lib/password.test.ts` — SHA-256 hex helper
+- `src/lib/password.ts` / `src/lib/password.test.ts` — SHA-256 hex helper and `timingSafeEqual`
 - `src/lib/services/user-service.ts` / `src/lib/services/user-service.test.ts` — D1 access for users
 - `src/app/api/auth/register/route.ts` / `route.test.ts` — register
 - `src/app/api/auth/login/route.ts` / `route.test.ts` — login
 - `src/app/api/auth/logout/route.ts` / `route.test.ts` — logout
 - `src/components/auth/` — client forms and logout, with `*.test.tsx`
-- `src/app/register/page.tsx` — register UI
-- `src/app/login/page.tsx` — login UI
+- `src/app/register/page.tsx` — register page
+- `src/app/login/page.tsx` — login page
 - `src/app/mcqs/page.tsx` — MCQ stub
 - `src/app/page.tsx` — entry with links to auth
 
@@ -420,17 +417,17 @@ async function sha256Hex(plaintext: string): Promise<string> {
 - [ ] Username and email may be the same string and still succeed
 - [ ] The database stores `password_hash` only; plaintext password is not stored
 - [ ] Register and login POST bodies send a SHA-256 hex digest, not the typed password
-- [ ] A teacher can log in with username and password and is taken to `/mcqs`
 - [ ] Wrong username or password returns 401 with a generic message and the user stays on `/login`
 - [ ] Duplicate username or email on register returns 409 and is shown on the form
-- [ ] Validation errors (missing fields, bad email, short password) return 400 and are shown on the form
-- [ ] Logout from `/mcqs` calls POST `/api/auth/logout` and returns the user to `/login` (or home)
+- [ ] Short password is blocked on the client before fetch; API 400 for invalid bodies
+- [ ] Logout from `/mcqs` calls POST `/api/auth/logout` and returns the user to `/login`
 - [ ] `/mcqs` is a stub only: no MCQ create/edit/list
 - [x] User service supports create, update, and delete even if only create/read are used by HTTP in this phase
-- [x] Phase 1 Vitest tests were written first (red: missing modules) and pass after implementation (green: 12 tests)
+- [x] Phase 1 Vitest tests pass (12 tests: `password.test.ts` + `user-service.test.ts`); D1 is mocked
 - [x] Unit tests do not call real D1, network, or model providers
-- [ ] Remaining phase Vitest tests (Phase 2–3) written first (red) then green
-- [x] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 1
+- [ ] Phase 2 Vitest tests were written first (red) then green
+- [ ] Phase 3 Vitest tests written first (red) then green
+- [ ] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
 
 ---
 
@@ -452,8 +449,8 @@ There is no production traffic yet. Success for this phase is that the teaching 
 
 ### External Dependencies
 
-- Cloudflare D1 — user storage (create locally; do not touch remote)
-- Wrangler — database create, migrations list/apply `--local`, typegen
+- Cloudflare D1 — user storage (use existing local DB; do not touch remote)
+- Wrangler — migrations list/apply `--local`, typegen
 
 ### Internal Dependencies
 
@@ -518,15 +515,8 @@ Add entries here when bugs are found and fixed.
 
 **Problem**: Second register with the same username or email returns 500.
 **Cause**: Unique constraint not mapped to 409.
-**Solution**: Catch D1 constraint errors in register and return 409. The user service throws `UserConflictError` (`src/lib/services/user-service.ts`) for the API to map.
-**Code Reference**: `src/lib/services/user-service.ts` (`UserConflictError`); `src/app/api/auth/register/route.ts` (once implemented)
-
-### Remote D1 not created in Phase 1
-
-**Problem**: `wrangler.jsonc` uses placeholder `database_id` `local-quizmaker-db`.
-**Cause**: Creating a remote D1 database was blocked so Phase 1 stayed local-only.
-**Solution**: When ready, run `npx wrangler d1 create quizmaker-db`, put the returned id in `wrangler.jsonc`, run `npm run cf-typegen`. Do not apply migrations with `--remote` unless the user asks.
-**Code Reference**: `wrangler.jsonc`
+**Solution**: Catch D1 constraint errors in the user service and throw `UserConflictError` for the API to map to 409.
+**Code Reference**: `src/lib/services/user-service.ts` (`UserConflictError`)
 
 ---
 
@@ -553,5 +543,5 @@ When working with this PRD:
 
 **Last Updated**: 2026-08-28
 **Current Phase**: Phase 1 - Database and user service
-**Status**: COMPLETED (awaiting review before Phase 2)
-**Next Steps**: After review, start Phase 2 with failing register/login/logout route tests, then implement until green. Remote D1 (`wrangler d1 create quizmaker-db`) was not provisioned; local binding uses placeholder `database_id`. Replace it when a remote database is created.
+**Status**: COMPLETED (reviewed)
+**Next Steps**: Stay on `feature/register-login-logout`. Do not start Phase 2 until asked. This session: do not create D1 migrations or deploy; the user handles those.

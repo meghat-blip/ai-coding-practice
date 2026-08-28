@@ -11,9 +11,10 @@ the problem, the primary user, and the current state. Two or three sentences.
 Keep it current. An out-of-date description here misleads every future conversation.
 -->
 
-This is an unmodified AISprints starter. No application features have been built yet.
-The technical PRD in `ai-workspace/` is the source of truth for what is being built and
-for the current phase of work.
+QuizMaker is a multi-teacher quiz bank. Sprint 1 is identity only (register, login,
+logout). Phase 1 is a local D1 `users` table and user service; auth HTTP/UI are later
+phases. The technical PRD in `ai-workspace/register-login-logout_prd.md` is the
+source of truth.
 
 ## Stack
 
@@ -24,8 +25,8 @@ for the current phase of work.
 - **TypeScript** in strict mode
 - **Wrangler** for Cloudflare configuration, secrets, and deployment
 
-No database, authentication, testing framework, or AI SDK is installed yet. Do not
-write code that imports one without adding it first and telling the user.
+D1 is bound as `DB` (local migrations only). Vitest is installed (`npm run test`).
+No authentication HTTP/UI or AI SDK yet. Ask before adding further dependencies.
 
 ## Layout
 
@@ -49,6 +50,7 @@ Import through the `@/` alias, which maps to `src/`.
 | `npm run preview` | Build and run on the local **Workers** runtime |
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
+| `npm run test` | Vitest unit tests |
 | `npm run deploy` | Build and deploy to Cloudflare |
 | `npm run cf-typegen` | Regenerate `cloudflare-env.d.ts` after changing bindings |
 

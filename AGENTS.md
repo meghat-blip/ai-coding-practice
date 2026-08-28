@@ -12,9 +12,8 @@ Keep it current. An out-of-date description here misleads every future conversat
 -->
 
 QuizMaker is a multi-teacher quiz bank. Sprint 1 is identity only (register, login,
-logout). Phase 1 (D1 `users` table and user service) is complete; HTTP and UI are later
-phases. The technical PRD in `ai-workspace/register-login-logout_prd.md` is the
-source of truth.
+logout). Phases 1–2 are complete (D1 users, user service, auth HTTP APIs). UI is Phase 3.
+The technical PRD in `ai-workspace/register-login-logout_prd.md` is the source of truth.
 
 ## Stack
 
@@ -26,8 +25,8 @@ source of truth.
 - **Wrangler** for Cloudflare configuration, secrets, and deployment
 
 D1 is bound as `DB` (local migrations only). Vitest is installed (`npm run test`).
-User service lives in `src/lib/services/user-service.ts`. Auth HTTP/UI are later
-phases. Ask before adding further dependencies.
+User service lives in `src/lib/services/user-service.ts`. Auth HTTP is under
+`src/app/api/auth/`. Auth UI is Phase 3. Ask before adding further dependencies.
 
 ## Layout
 

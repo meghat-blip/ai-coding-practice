@@ -1,5 +1,5 @@
 Date created: 2026-08-28
-Date last modified: 2026-08-28 (Phase 1 complete, awaiting review)
+Date last modified: 2026-08-28 (Phase 2 reviewed)
 
 # Register, Login, and Logout - Technical PRD
 
@@ -266,7 +266,7 @@ Mock `@opennextjs/cloudflare` and a fake D1 (`prepare` / `bind` / `all` / `run`)
 - `src/lib/password.ts` and colocated tests
 - User service with create, update, delete, and get-by-username, plus colocated tests
 
-### Phase 2: Auth HTTP endpoints - PLANNED
+### Phase 2: Auth HTTP endpoints - COMPLETED
 
 **Objective**: Register, login, and logout HTTP APIs sit in front of the user service.
 
@@ -350,15 +350,16 @@ Mock `fetch` and the Next.js router (`next/navigation`). Use Testing Library + `
 - `wrangler.jsonc` — D1 `DB` binding
 - `migrations/` — `users` table
 - `src/lib/password.ts` / `src/lib/password.test.ts` — SHA-256 hex helper and `timingSafeEqual`
+- `src/lib/auth-http.ts` — JSON body parse and register/login field validation (no Zod)
 - `src/lib/services/user-service.ts` / `src/lib/services/user-service.test.ts` — D1 access for users
 - `src/app/api/auth/register/route.ts` / `route.test.ts` — register
 - `src/app/api/auth/login/route.ts` / `route.test.ts` — login
 - `src/app/api/auth/logout/route.ts` / `route.test.ts` — logout
-- `src/components/auth/` — client forms and logout, with `*.test.tsx`
-- `src/app/register/page.tsx` — register page
-- `src/app/login/page.tsx` — login page
-- `src/app/mcqs/page.tsx` — MCQ stub
-- `src/app/page.tsx` — entry with links to auth
+- `src/components/auth/` — Phase 3 client forms (not in this phase)
+- `src/app/register/page.tsx` — Phase 3
+- `src/app/login/page.tsx` — Phase 3
+- `src/app/mcqs/page.tsx` — Phase 3
+- `src/app/page.tsx` — Phase 3
 
 ### Implementation Patterns
 
@@ -425,7 +426,7 @@ async function sha256Hex(plaintext: string): Promise<string> {
 - [x] User service supports create, update, and delete even if only create/read are used by HTTP in this phase
 - [x] Phase 1 Vitest tests pass (12 tests: `password.test.ts` + `user-service.test.ts`); D1 is mocked
 - [x] Unit tests do not call real D1, network, or model providers
-- [ ] Phase 2 Vitest tests were written first (red) then green
+- [x] Phase 2 Vitest tests pass (10 tests: register 5, login 4, logout 1); user service mocked, no real D1
 - [ ] Phase 3 Vitest tests written first (red) then green
 - [ ] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
 
@@ -515,8 +516,8 @@ Add entries here when bugs are found and fixed.
 
 **Problem**: Second register with the same username or email returns 500.
 **Cause**: Unique constraint not mapped to 409.
-**Solution**: Catch D1 constraint errors in the user service and throw `UserConflictError` for the API to map to 409.
-**Code Reference**: `src/lib/services/user-service.ts` (`UserConflictError`)
+**Solution**: Catch D1 constraint errors in the user service and throw `UserConflictError`; register maps that to 409.
+**Code Reference**: `src/lib/services/user-service.ts` (`UserConflictError`); `src/app/api/auth/register/route.ts`
 
 ---
 
@@ -542,6 +543,6 @@ When working with this PRD:
 ## Current Status
 
 **Last Updated**: 2026-08-28
-**Current Phase**: Phase 1 - Database and user service
+**Current Phase**: Phase 2 - Auth HTTP endpoints
 **Status**: COMPLETED (reviewed)
-**Next Steps**: Stay on `feature/register-login-logout`. Do not start Phase 2 until asked. This session: do not create D1 migrations or deploy; the user handles those.
+**Next Steps**: Stay on `feature/register-login-logout`. Do not start Phase 3 until asked. This session: do not create D1 migrations or deploy; the user handles those.

@@ -21,8 +21,8 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "quizmaker-db",
-			"database_id": "local-quizmaker-db",
+			"database_name": "quizmaker",
+			"database_id": "eb994673-ca19-4838-9b17-09cd2e17fc02",
 			"migrations_dir": "./migrations"
 		}
 	]

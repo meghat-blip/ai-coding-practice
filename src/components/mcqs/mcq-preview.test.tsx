@@ -22,6 +22,7 @@ describe("McqPreview", () => {
 		render(<McqPreview mcq={mcq} />);
 
 		expect(screen.getByText("Which gas do plants absorb?")).toBeTruthy();
+		expect(screen.getByText(/select one answer/i)).toBeTruthy();
 		expect(screen.getByRole("radio", { name: /carbon dioxide/i })).toBeTruthy();
 		expect(screen.getByRole("radio", { name: /oxygen/i })).toBeTruthy();
 		expect(screen.queryByText(/^correct$/i)).toBeNull();

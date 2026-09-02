@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type PreviewChoice = {
@@ -58,8 +59,14 @@ export function McqPreview({ mcq }: McqPreviewProps) {
 	}
 
 	return (
-		<div className="flex flex-col gap-6">
-			{mcq.name ? <h2 className="text-lg font-medium">{mcq.name}</h2> : null}
+		<Card>
+			<CardHeader>
+				<CardTitle>
+					<h2>{mcq.name ?? "Preview"}</h2>
+				</CardTitle>
+				<CardDescription>Select one answer, then check whether it is correct.</CardDescription>
+			</CardHeader>
+			<CardContent className="flex flex-col gap-6">
 			<p>{mcq.question}</p>
 			<RadioGroup value={choiceId} onValueChange={setChoiceId}>
 				{mcq.choices.map((choice) => (
@@ -79,6 +86,7 @@ export function McqPreview({ mcq }: McqPreviewProps) {
 					Back to question bank
 				</Link>
 			</div>
-		</div>
+			</CardContent>
+		</Card>
 	);
 }

@@ -18,6 +18,7 @@ describe("McqList", () => {
 		vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ items: [] }), { status: 200 }));
 		render(<McqList />);
 
+		expect(screen.getByRole("heading", { name: /^questions$/i })).toBeTruthy();
 		expect(screen.getByRole("columnheader", { name: /name/i })).toBeTruthy();
 		expect(screen.getByRole("columnheader", { name: /question/i })).toBeTruthy();
 		expect(screen.getByRole("columnheader", { name: /actions/i })).toBeTruthy();

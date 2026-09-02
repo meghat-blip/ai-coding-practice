@@ -26,6 +26,8 @@ describe("McqEditorForm", () => {
 	it("renders name, question, two choices, Save, and Cancel in create mode", () => {
 		render(<McqEditorForm />);
 
+		expect(screen.getByRole("heading", { name: /create question/i })).toBeTruthy();
+		expect(screen.getByText(/short title shown in the question bank/i)).toBeTruthy();
 		expect(screen.getByLabelText(/^name$/i)).toBeTruthy();
 		expect(screen.getByLabelText(/^question$/i)).toBeTruthy();
 		expect(screen.getByLabelText("Choice 1")).toBeTruthy();
@@ -148,6 +150,8 @@ describe("McqEditorForm", () => {
 				}}
 			/>,
 		);
+
+		expect(screen.getByRole("heading", { name: /edit question/i })).toBeTruthy();
 
 		await user.clear(screen.getByLabelText(/^name$/i));
 		await user.type(screen.getByLabelText(/^name$/i), "New title");

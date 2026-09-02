@@ -4,7 +4,8 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
@@ -142,11 +143,24 @@ export function McqEditorForm({ mcqId, initialMcq }: McqEditorFormProps) {
 	}
 
 	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>
+					<h2>{mcqId ? "Edit question" : "Create question"}</h2>
+				</CardTitle>
+				<CardDescription>
+					{mcqId
+						? "Update the stem and choices. The original author is not changed."
+						: "Add a short name, the question stem, and two to six choices."}
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
 		<form onSubmit={(event) => void onSubmit(event)} className="flex flex-col gap-6">
 			<FieldGroup>
 				<Field>
 					<FieldLabel htmlFor="mcq-name">Name</FieldLabel>
 					<Input id="mcq-name" value={name} onChange={(event) => setName(event.target.value)} />
+					<FieldDescription>Short title shown in the question bank.</FieldDescription>
 				</Field>
 				<Field>
 					<FieldLabel htmlFor="mcq-question">Question</FieldLabel>
@@ -155,6 +169,10 @@ export function McqEditorForm({ mcqId, initialMcq }: McqEditorFormProps) {
 						value={question}
 						onChange={(event) => setQuestion(event.target.value)}
 					/>
+					<FieldDescription>The stem students see in preview.</FieldDescription>
+				</Field>
+				<Field>
+					<FieldDescription>Mark one choice as the correct answer.</FieldDescription>
 				</Field>
 				<RadioGroup
 					value={correctIndex >= 0 ? String(correctIndex) : ""}
@@ -217,5 +235,7 @@ export function McqEditorForm({ mcqId, initialMcq }: McqEditorFormProps) {
 				</div>
 			</FieldGroup>
 		</form>
+			</CardContent>
+		</Card>
 	);
 }

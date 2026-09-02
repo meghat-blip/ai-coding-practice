@@ -48,15 +48,14 @@ export default function EditMcqPage() {
 	}, [id]);
 
 	return (
-		<main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-8">
-			<div className="flex items-center justify-between gap-4">
-				<h1 className="text-2xl font-medium">Edit question</h1>
+		<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+			<div className="flex w-full max-w-xl flex-col gap-4">
 				<Link href="/mcqs" className="text-sm underline-offset-4 hover:underline">
-					Back
+					Back to question bank
 				</Link>
+				{error ? <p className="text-destructive">{error}</p> : null}
+				{initialMcq ? <McqEditorForm mcqId={id} initialMcq={initialMcq} /> : null}
 			</div>
-			{error ? <p className="text-destructive">{error}</p> : null}
-			{initialMcq ? <McqEditorForm mcqId={id} initialMcq={initialMcq} /> : null}
-		</main>
+		</div>
 	);
 }

@@ -1,5 +1,5 @@
 Date created: 2026-09-02
-Date last modified: 2026-09-02 (Phase 3 list/editor/preview UI complete)
+Date last modified: 2026-09-02 (Phase 4 shadcn Card blocks)
 
 # MCQ Create, Update, and Delete - Technical PRD
 
@@ -438,6 +438,43 @@ Mock `fetch` and `next/navigation`. Use Testing Library + `userEvent`; query by 
 - Client user-id helper used by auth forms, logout, and create
 - Colocated `*.test.tsx`
 
+### Phase 4: shadcn card blocks for bank, editor, and preview - COMPLETED
+
+**Objective**: List, editor, and preview use the same shadcn **Card** / **Field** / **FieldDescription** language as register and login, without changing the Phase 1–3 HTTP or TDD contracts.
+
+The visual starting point is the auth block (`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `FieldDescription`). Pages use `min-h-svh` shells. Do not add `react-hook-form` or new npm packages.
+
+| Surface | QuizMaker |
+|---------|-----------|
+| `/mcqs` table | Card titled **Questions**; create control stays a link to `/mcqs/new` |
+| Create/edit form | Card titled **Create question** or **Edit question**; name/question `FieldDescription`s |
+| Preview | Card titled with the question **name**; helper copy to select one answer |
+
+**TDD — tests to write first (expect red against the Phase 3 layout without these headings/copy):**
+
+| File | Behavior to assert |
+|------|-------------------|
+| `src/components/mcqs/mcq-list.test.tsx` | Heading **Questions**; empty-state copy still present |
+| `src/components/mcqs/mcq-editor-form.test.tsx` | Create mode heading **Create question**; name hint mentions the question bank |
+| Same | Edit mode heading **Edit question** |
+| `src/components/mcqs/mcq-preview.test.tsx` | Helper copy matches `/select one answer/i` |
+
+Keep all Phase 3 fetch/navigation/validation tests green.
+
+**Tasks**:
+
+1. Extend the tests above; confirm they are red
+2. Wrap list, editor, and preview in shadcn `Card` blocks; add `FieldDescription` on the editor
+3. Restyle `/mcqs`, `/mcqs/new`, `/mcqs/[id]/edit`, `/mcqs/[id]/preview` as `min-h-svh` page shells (wider than login: `max-w-3xl` / `max-w-xl`)
+4. Confirm `npm run test`, `npm run lint`, and `npm run build`
+
+**Phase 4 gate:** Full Vitest suite green; lint and build pass; MCQ pages match the Card-block layout.
+
+**Deliverables**:
+
+- `McqList`, `McqEditorForm`, and `McqPreview` as Card blocks
+- Page shells aligned with the auth `min-h-svh` pattern
+
 ---
 
 ## Technical Implementation Details
@@ -659,6 +696,6 @@ When working with this PRD:
 ## Current Status
 
 **Last Updated**: 2026-09-02
-**Current Phase**: Phase 3 - List, editor, preview UI
-**Status**: COMPLETED (component tests; interactive browser not run in this session)
-**Next Steps**: Review Phase 3. Verify against local D1 with `npm run preview` if desired. Do not apply 0002 remotely. Do not deploy.
+**Current Phase**: Phase 4 - shadcn card blocks
+**Status**: COMPLETED (awaiting review; interactive browser not run in this session)
+**Next Steps**: Review Phase 4. On approval, commit and push on `feature/mcq_crud_branch`. Do not apply 0002 remotely. Do not deploy.

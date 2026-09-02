@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { McqRowActions } from "@/components/mcqs/mcq-row-actions";
 
@@ -66,12 +67,19 @@ export function McqList() {
 	}, []);
 
 	return (
-		<div className="flex flex-col gap-4">
-			<div className="flex justify-end">
+		<Card>
+			<CardHeader className="flex flex-row items-start justify-between gap-4">
+				<div className="flex flex-col gap-1">
+					<CardTitle>
+						<h2>Questions</h2>
+					</CardTitle>
+					<CardDescription>Create, edit, preview, or delete multiple-choice questions.</CardDescription>
+				</div>
 				<Link href="/mcqs/new" className={buttonVariants()}>
 					Create question
 				</Link>
-			</div>
+			</CardHeader>
+			<CardContent className="flex flex-col gap-4">
 			{error ? <p className="text-destructive">{error}</p> : null}
 			<Table>
 				<TableHeader>
@@ -94,6 +102,7 @@ export function McqList() {
 				</TableBody>
 			</Table>
 			{items && items.length === 0 ? <p className="text-muted-foreground">No questions yet.</p> : null}
-		</div>
+			</CardContent>
+		</Card>
 	);
 }

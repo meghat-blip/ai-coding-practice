@@ -1,0 +1,17 @@
+---
+description: Commit and push only after the user approves, and always to the current branch
+alwaysApply: true
+---
+
+# Commit and push after user approval
+
+Do not create a git commit or push unless the user has clearly asked for it in this conversation (for example: “commit”, “push”, “commit and push”, or “get this in”).
+
+When they approve:
+
+1. Commit only the work they approved. Do not add unrelated dirty files, secrets, or generated lockfile noise they did not ask to include.
+2. Push to the **current** branch (`git push -u origin HEAD` if it has no upstream). Do not switch branches, force-push, or push to a different branch unless they name one.
+3. Follow the repo git safety rules: no `--no-verify`, no amend unless their rules allow it, no force push to main/master.
+4. After push, report the branch name, commit, and whether the remote was updated.
+
+If they ask only to commit, do not push. If they ask only to push, do not invent a new commit.

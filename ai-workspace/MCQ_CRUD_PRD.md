@@ -1,5 +1,5 @@
 Date created: 2026-09-02
-Date last modified: 2026-09-02 (Phase 4 shadcn Card blocks)
+Date last modified: 2026-09-02 (Phase 6 failed fetches and preview Badge)
 
 # MCQ Create, Update, and Delete - Technical PRD
 
@@ -475,6 +475,68 @@ Keep all Phase 3 fetch/navigation/validation tests green.
 - `McqList`, `McqEditorForm`, and `McqPreview` as Card blocks
 - Page shells aligned with the auth `min-h-svh` pattern
 
+### Phase 5: Loading and not-found states - COMPLETED
+
+**Objective**: Teachers see a loading message while MCQ data is fetched, and a clear **Question not found** state on edit/preview when `GET /api/mcqs/:id` returns 404. Do not change the CRUD API contract.
+
+Edit and preview fetch lives in testable client loaders (not only in page files). List shows loading while `items` is still unknown (distinct from the empty bank).
+
+**TDD — tests to write first (expect red):**
+
+| File | Behavior to assert |
+|------|-------------------|
+| `src/components/mcqs/mcq-list.test.tsx` | Pending `GET /api/mcqs` shows `/loading questions/i`; after resolve, loading is gone |
+| `src/components/mcqs/mcq-editor-loader.test.tsx` | Pending GET shows `/loading question/i`; 200 renders **Edit question**; 404 shows `/question not found/i` and no editor |
+| `src/components/mcqs/mcq-preview-loader.test.tsx` | Pending GET shows `/loading question/i`; 200 renders the stem; 404 shows `/question not found/i` and no **Check answer** |
+
+Keep Phase 3–4 tests green. Mock `fetch` and `next/navigation`. Do not hit real D1.
+
+**Tasks**:
+
+1. Write the tests above; confirm red
+2. Add loading copy to `McqList`
+3. Extract `McqEditorLoader` and `McqPreviewLoader`; wire edit/preview pages to them
+4. `npm run test`, `npm run lint`, and `npm run build`
+
+**Phase 5 gate:** Full suite green; lint and build pass.
+
+**Deliverables**:
+
+- Loading copy on the question list
+- `src/components/mcqs/mcq-editor-loader.tsx` and `mcq-preview-loader.tsx` with colocated tests
+
+### Phase 6: Failed fetches and preview Badge - COMPLETED
+
+**Objective**: A non-OK `GET` is a load failure, not a successful empty or filled UI. Preview correct/incorrect uses the existing shadcn **Badge**. Do not change the CRUD API contract. Do not add npm packages (`badge` is already in `src/components/ui/`).
+
+Today a 500 list response with `{ items: [] }` can look like an empty bank, and a 500 get-by-id with a parseable body can still open the editor or preview.
+
+**TDD — tests to write first (expect red):**
+
+| File | Behavior to assert |
+|------|-------------------|
+| `src/components/mcqs/mcq-list.test.tsx` | `GET /api/mcqs` status 500 with `{ items: [] }` shows `/could not load questions/i`; no empty-state copy |
+| `src/components/mcqs/mcq-editor-loader.test.tsx` | GET status 500 with a parseable MCQ body shows `/could not load this question/i`; no **Edit question** |
+| `src/components/mcqs/mcq-preview-loader.test.tsx` | GET status 500 with a parseable MCQ body shows `/could not load this question/i`; no **Check answer** |
+| `src/components/mcqs/mcq-preview.test.tsx` | After a recorded attempt, **Incorrect** (or **Correct**) is a Badge (`data-slot="badge"`) |
+
+Keep Phase 3–5 tests green. Mock `fetch` and `next/navigation`. Do not hit real D1.
+
+**Tasks**:
+
+1. Write the tests above; confirm red
+2. Treat non-OK list GET (including `reload` after delete) as load failure
+3. Treat non-OK get-by-id as load failure except 404 (still **Question not found**)
+4. Render preview result with `Badge`
+5. `npm run test`, `npm run lint`, and `npm run build`
+
+**Phase 6 gate:** Full suite green; lint and build pass.
+
+**Deliverables**:
+
+- List and loaders ignore successful-looking JSON when the HTTP status is not OK
+- Preview attempt result uses `Badge`
+
 ---
 
 ## Technical Implementation Details
@@ -487,20 +549,15 @@ Keep all Phase 3 fetch/navigation/validation tests green.
 - `src/lib/mcq-schema.contract.test.ts` — asserts 0002 SQL matches the schema contract
 - `src/lib/services/mcq-service.ts` / `mcq-service.test.ts` — D1 access for questions, choices, attempts
 - `src/lib/client-user.ts` — sessionStorage for public user `id` after login/register; cleared on logout
-- `src/components/mcqs/` — list, row actions, editor, preview (client) and tests
+- `src/components/mcqs/` — list, row actions, editor, preview, editor/preview loaders (client) and tests
 - `src/app/mcqs/page.tsx` — question bank (table + create + logout)
 - `src/app/mcqs/new/page.tsx` — create shell
-- `src/app/mcqs/[id]/edit/page.tsx` — edit shell
-- `src/app/mcqs/[id]/preview/page.tsx` — preview shell
+- `src/app/mcqs/[id]/edit/page.tsx` — edit shell wrapping `McqEditorLoader`
+- `src/app/mcqs/[id]/preview/page.tsx` — preview shell wrapping `McqPreviewLoader`
 - `src/components/ui/dropdown-menu.tsx`, `textarea.tsx`, `radio-group.tsx` — shadcn CLI adds
 - `src/app/api/mcqs/route.ts` / `route.test.ts` — GET list, POST create
 - `src/app/api/mcqs/[id]/route.ts` / `route.test.ts` — GET / PUT / DELETE
 - `src/app/api/mcqs/[id]/attempts/route.ts` / `route.test.ts` — POST attempt
-- `src/components/mcqs/` — list, row actions, editor, preview (client) and tests
-- `src/app/mcqs/page.tsx` — question bank (table + create + logout)
-- `src/app/mcqs/new/page.tsx` — create shell
-- `src/app/mcqs/[id]/edit/page.tsx` — edit shell
-- `src/app/mcqs/[id]/preview/page.tsx` — preview shell
 
 ### Implementation Patterns
 
@@ -581,6 +638,10 @@ Typed errors such as `McqValidationError` and `McqNotFoundError` keep route mapp
 - [x] Identity tests remain green
 - [x] Unit tests do not call real D1, network, or model providers
 - [x] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
+- [x] List shows loading while `GET /api/mcqs` is pending (distinct from empty bank)
+- [x] Edit and preview show loading, then **Question not found** on GET 404 without the editor or Check answer
+- [x] Non-OK GET list/get-by-id is a load error, not an empty bank or a populated editor/preview
+- [x] Preview Correct/Incorrect uses shadcn Badge
 
 ---
 
@@ -669,6 +730,13 @@ Add entries here when bugs are found and fixed.
 **Solution**: Run `npm run preview` and apply migrations with `--local`.
 **Code Reference**: `wrangler.jsonc` D1 binding; `.cursor/rules/d1.mdc`
 
+### List looked empty after a failed GET
+
+**Problem**: `/mcqs` showed “No questions yet.” when the API failed.
+**Cause**: The list parsed `{ items: [] }` without checking `response.ok`.
+**Solution**: Treat any non-OK `GET /api/mcqs` as “Could not load questions”. Same for get-by-id except 404.
+**Code Reference**: `src/components/mcqs/mcq-list.tsx`; `mcq-editor-loader.tsx`; `mcq-preview-loader.tsx`
+
 ---
 
 ## Notes for AI Agents
@@ -696,6 +764,6 @@ When working with this PRD:
 ## Current Status
 
 **Last Updated**: 2026-09-02
-**Current Phase**: Phase 4 - shadcn card blocks
+**Current Phase**: Phase 6 - failed fetches and preview Badge
 **Status**: COMPLETED (awaiting review; interactive browser not run in this session)
-**Next Steps**: Review Phase 4. On approval, commit and push on `feature/mcq_crud_branch`. Do not apply 0002 remotely. Do not deploy.
+**Next Steps**: Review Phase 6. On approval, commit and push on `feature/mcq_crud_branch`. Do not apply 0002 remotely. Do not deploy.

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type PreviewChoice = {
@@ -76,7 +77,11 @@ export function McqPreview({ mcq }: McqPreviewProps) {
 					</label>
 				))}
 			</RadioGroup>
-			{result ? <p>{result === "correct" ? "Correct" : "Incorrect"}</p> : null}
+			{result ? (
+				<Badge variant={result === "correct" ? "default" : "destructive"}>
+					{result === "correct" ? "Correct" : "Incorrect"}
+				</Badge>
+			) : null}
 			{error ? <p className="text-destructive">{error}</p> : null}
 			<div className="flex gap-2">
 				<Button type="button" disabled={pending} onClick={() => void onCheck()}>

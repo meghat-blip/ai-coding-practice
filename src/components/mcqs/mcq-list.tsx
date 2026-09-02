@@ -41,6 +41,10 @@ export function McqList() {
 	async function reload() {
 		try {
 			const response = await fetch("/api/mcqs");
+			if (!response.ok) {
+				setError("Could not load questions");
+				return;
+			}
 			applyPayload(await response.json());
 		} catch {
 			setError("Could not load questions");
@@ -50,7 +54,12 @@ export function McqList() {
 	useEffect(() => {
 		let cancelled = false;
 		fetch("/api/mcqs")
-			.then((response) => response.json())
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error("load failed");
+				}
+				return response.json();
+			})
 			.then((data: unknown) => {
 				if (!cancelled) {
 					applyPayload(data);
@@ -81,6 +90,7 @@ export function McqList() {
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
 			{error ? <p className="text-destructive">{error}</p> : null}
+			{!error && items === null ? <p className="text-muted-foreground">Loading questions…</p> : null}
 			<Table>
 				<TableHeader>
 					<TableRow>

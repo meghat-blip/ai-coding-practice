@@ -52,10 +52,35 @@ describe("McqList", () => {
 		expect(fetch).toHaveBeenCalledWith("/api/mcqs");
 	});
 
+	it("shows loading copy until GET /api/mcqs resolves", async () => {
+		let resolveFetch!: (value: Response) => void;
+		vi.mocked(fetch).mockImplementation(
+			() =>
+				new Promise((resolve) => {
+					resolveFetch = resolve;
+				}),
+		);
+		render(<McqList />);
+
+		expect(screen.getByText(/loading questions/i)).toBeTruthy();
+		resolveFetch(new Response(JSON.stringify({ items: [] }), { status: 200 }));
+		expect(await screen.findByText(/no questions yet/i)).toBeTruthy();
+		expect(screen.queryByText(/loading questions/i)).toBeNull();
+	});
+
 	it("shows an empty state when items is empty", async () => {
 		vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ items: [] }), { status: 200 }));
 		render(<McqList />);
 
 		expect(await screen.findByText(/no questions yet/i)).toBeTruthy();
+	});
+
+	it("shows Could not load questions when GET /api/mcqs is not ok, even if the body has items", async () => {
+		vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ items: [] }), { status: 500 }));
+		render(<McqList />);
+
+		expect(await screen.findByText(/could not load questions/i)).toBeTruthy();
+		expect(screen.queryByText(/no questions yet/i)).toBeNull();
+		expect(screen.queryByText(/loading questions/i)).toBeNull();
 	});
 });

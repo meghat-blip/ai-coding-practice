@@ -47,5 +47,6 @@ describe("McqPreview", () => {
 			body: JSON.stringify({ choiceId: "choice-2" }),
 		});
 		expect(await screen.findByText(/^incorrect$/i)).toBeTruthy();
+		expect(screen.getByText(/^incorrect$/i).getAttribute("data-slot")).toBe("badge");
 	});
 });

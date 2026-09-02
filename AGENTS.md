@@ -11,9 +11,11 @@ the problem, the primary user, and the current state. Two or three sentences.
 Keep it current. An out-of-date description here misleads every future conversation.
 -->
 
-QuizMaker is a multi-teacher quiz bank. Sprint 1 is identity only (register, login,
-logout). Phases 1–2 are complete (D1 users, user service, auth HTTP APIs). UI is Phase 3.
-The technical PRD in `ai-workspace/register-login-logout_prd.md` is the source of truth.
+QuizMaker is a multi-teacher quiz bank. Teachers can register, sign in, and
+author multiple-choice questions (list, create, edit, preview, delete). Identity
+has no server session yet; `created_by` is stored from the client-held user id.
+Technical PRDs: `ai-workspace/register-login-logout_prd.md` and
+`ai-workspace/MCQ_CRUD_PRD.md`.
 
 ## Stack
 
@@ -25,8 +27,11 @@ The technical PRD in `ai-workspace/register-login-logout_prd.md` is the source o
 - **Wrangler** for Cloudflare configuration, secrets, and deployment
 
 D1 is bound as `DB` (local migrations only). Vitest is installed (`npm run test`).
-User service lives in `src/lib/services/user-service.ts`. Auth HTTP is under
-`src/app/api/auth/`. Auth UI is Phase 3. Ask before adding further dependencies.
+User service lives in `src/lib/services/user-service.ts`. MCQ service lives in
+`src/lib/services/mcq-service.ts`. Auth HTTP is under `src/app/api/auth/`. MCQ HTTP
+is under `src/app/api/mcqs/`. Auth UI is under `src/components/auth/`. MCQ UI is
+under `src/components/mcqs/` and `/register`, `/login`, `/mcqs`. Ask before adding
+further dependencies.
 
 ## Layout
 

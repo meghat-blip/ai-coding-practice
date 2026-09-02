@@ -1,5 +1,5 @@
 Date created: 2026-09-02
-Date last modified: 2026-09-02 (Phase 1: schema contract + local 0002)
+Date last modified: 2026-09-02 (Phase 3 list/editor/preview UI complete)
 
 # MCQ Create, Update, and Delete - Technical PRD
 
@@ -305,11 +305,13 @@ Fields:
 
 TDD is required in every phase: listed tests first (red), then implementation (green). `npm run test` is a phase gate along with the acceptance criteria.
 
-### Phase 1: Database and MCQ service - IN PROGRESS
+### Phase 1: Database and MCQ service - COMPLETED
 
 **Objective**: Local D1 has `mcqs`, `mcq_choices`, and `mcq_attempts`. The MCQ service can create, list, get, update, delete questions (with choices) and record attempts.
 
-**Schema slice (done):** contract tests went red (no `0002` file), then `migrations/0002_create_mcq_tables.sql` was created and applied with `--local` only. Remaining work is `mcq-service` TDD (red then green).
+**Schema slice (done):** contract tests went red (no `0002` file), then `migrations/0002_create_mcq_tables.sql` was created and applied with `--local` only.
+
+**Service slice (done):** `mcq-service` tests went red (missing module), then `src/lib/services/mcq-service.ts` until 13 tests green. D1 is mocked.
 
 **TDD — tests to write first (expect red):**
 
@@ -345,7 +347,7 @@ Mock `@opennextjs/cloudflare` and a fake D1 (`prepare` / `bind` / `all` / `run`)
 - `migrations/` SQL for `mcqs`, `mcq_choices`, `mcq_attempts`
 - MCQ service with list/create/get/update/delete and `recordAttempt`, plus colocated tests
 
-### Phase 2: HTTP endpoints - PLANNED
+### Phase 2: HTTP endpoints - COMPLETED
 
 **Objective**: REST handlers sit in front of the MCQ service.
 
@@ -380,7 +382,7 @@ Mock the MCQ service at the module boundary. Do not import a real D1.
 
 - Route handlers and colocated tests under `src/app/api/mcqs/`
 
-### Phase 3: List, editor, preview UI - PLANNED
+### Phase 3: List, editor, preview UI - COMPLETED
 
 **Objective**: Teachers can list, create, edit, preview (with an attempt), and delete MCQs using shadcn.
 
@@ -447,10 +449,16 @@ Mock `fetch` and `next/navigation`. Use Testing Library + `userEvent`; query by 
 - `migrations/0002_create_mcq_tables.sql` — `mcqs`, `mcq_choices`, `mcq_attempts` (applied locally)
 - `src/lib/mcq-schema.contract.test.ts` — asserts 0002 SQL matches the schema contract
 - `src/lib/services/mcq-service.ts` / `mcq-service.test.ts` — D1 access for questions, choices, attempts
-- `src/lib/client-user.ts` — sessionStorage (or equivalent) for public user `id` after login/register
-- `src/app/api/mcqs/route.ts` — GET list, POST create
-- `src/app/api/mcqs/[id]/route.ts` — GET / PUT / DELETE
-- `src/app/api/mcqs/[id]/attempts/route.ts` — POST attempt
+- `src/lib/client-user.ts` — sessionStorage for public user `id` after login/register; cleared on logout
+- `src/components/mcqs/` — list, row actions, editor, preview (client) and tests
+- `src/app/mcqs/page.tsx` — question bank (table + create + logout)
+- `src/app/mcqs/new/page.tsx` — create shell
+- `src/app/mcqs/[id]/edit/page.tsx` — edit shell
+- `src/app/mcqs/[id]/preview/page.tsx` — preview shell
+- `src/components/ui/dropdown-menu.tsx`, `textarea.tsx`, `radio-group.tsx` — shadcn CLI adds
+- `src/app/api/mcqs/route.ts` / `route.test.ts` — GET list, POST create
+- `src/app/api/mcqs/[id]/route.ts` / `route.test.ts` — GET / PUT / DELETE
+- `src/app/api/mcqs/[id]/attempts/route.ts` / `route.test.ts` — POST attempt
 - `src/components/mcqs/` — list, row actions, editor, preview (client) and tests
 - `src/app/mcqs/page.tsx` — question bank (table + create + logout)
 - `src/app/mcqs/new/page.tsx` — create shell
@@ -522,20 +530,20 @@ Typed errors such as `McqValidationError` and `McqNotFoundError` keep route mapp
 ## Acceptance Criteria
 
 - [x] Local D1 has `mcqs` with `id`, `name`, `question`, `created_by`, `created_at`, `updated_at`, plus `mcq_choices` and `mcq_attempts` (local apply only)
-- [ ] Teachers see a table of questions on `/mcqs` (name, question, actions) instead of stub-only copy
-- [ ] Create navigates to a form with two choices by default and can add up to six
-- [ ] Save on create persists name, question, created_by, and choices and returns to `/mcqs` with the new row visible
-- [ ] Edit loads the MCQ, Save updates name/question/choices but not created_by, Cancel does not write
-- [ ] Actions menu offers Edit, Preview, and Delete
-- [ ] Delete removes the question (and cascaded choices/attempts) after confirmation
-- [ ] Preview submits an attempt and shows whether the selected choice was correct
-- [ ] API and service reject fewer than 2 or more than 6 choices, blank name, blank question, missing/unknown createdBy, and not exactly one correct choice
-- [ ] Phase 1 Vitest tests pass; D1 is mocked
-- [ ] Phase 2 Vitest tests pass; MCQ service is mocked
-- [ ] Phase 3 Vitest tests pass; `fetch` and router are mocked
-- [ ] Identity tests remain green
-- [ ] Unit tests do not call real D1, network, or model providers
-- [ ] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
+- [x] Teachers see a table of questions on `/mcqs` (name, question, actions) instead of stub-only copy
+- [x] Create navigates to a form with two choices by default and can add up to six
+- [x] Save on create persists name, question, created_by, and choices and returns to `/mcqs` with the new row visible
+- [x] Edit loads the MCQ, Save updates name/question/choices but not created_by, Cancel does not write
+- [x] Actions menu offers Edit, Preview, and Delete
+- [x] Delete removes the question (and cascaded choices/attempts) after confirmation
+- [x] Preview submits an attempt and shows whether the selected choice was correct
+- [x] API and service reject fewer than 2 or more than 6 choices, blank name, blank question, missing/unknown createdBy, and not exactly one correct choice
+- [x] Phase 1 Vitest tests pass; D1 is mocked
+- [x] Phase 2 Vitest tests pass; MCQ service is mocked
+- [x] Phase 3 Vitest tests pass; `fetch` and router are mocked
+- [x] Identity tests remain green
+- [x] Unit tests do not call real D1, network, or model providers
+- [x] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
 
 ---
 
@@ -651,6 +659,6 @@ When working with this PRD:
 ## Current Status
 
 **Last Updated**: 2026-09-02
-**Current Phase**: Phase 1 - Database and MCQ service
-**Status**: IN PROGRESS (schema contract + local 0002 done; MCQ service not started)
-**Next Steps**: Write failing `mcq-service` tests (red), then implement the service until green. Do not apply 0002 remotely. Do not deploy.
+**Current Phase**: Phase 3 - List, editor, preview UI
+**Status**: COMPLETED (component tests; interactive browser not run in this session)
+**Next Steps**: Review Phase 3. Verify against local D1 with `npm run preview` if desired. Do not apply 0002 remotely. Do not deploy.

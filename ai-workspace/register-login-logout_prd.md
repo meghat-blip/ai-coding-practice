@@ -1,5 +1,5 @@
 Date created: 2026-08-28
-Date last modified: 2026-08-28 (Phase 2 reviewed)
+Date last modified: 2026-08-28 (Phase 4 shadcn register/login blocks)
 
 # Register, Login, and Logout - Technical PRD
 
@@ -303,7 +303,7 @@ Mock the user service at the module boundary. Do not import a real D1.
 - Duplicate username/email → 409
 - Bad credentials → 401 with a generic message
 
-### Phase 3: UI and MCQ stub - PLANNED
+### Phase 3: UI and MCQ stub - COMPLETED
 
 **Objective**: Teachers can register, log in, land on `/mcqs`, and log out.
 
@@ -340,6 +340,47 @@ Mock `fetch` and the Next.js router (`next/navigation`). Use Testing Library + `
 - Client form/logout components and colocated tests
 - Lint, unit tests, and production build passing
 
+### Phase 4: shadcn register and login blocks - COMPLETED (awaiting review)
+
+**Objective**: Register and login use the shadcn signup/login **block** layout (`Card`, `Field`, `FieldDescription`, centered `min-h-svh` / `max-w-sm` pages) while keeping the Phase 1–3 identity contract.
+
+The official blocks are the visual starting point. They are **adapted**, not copied blindly:
+
+| Official block | QuizMaker |
+|----------------|-----------|
+| Full Name | First name + last name (`users` table) |
+| Email-only login | Username + password (login API) |
+| Confirm password | Client-only; not sent to the API |
+| Sign up / Login with Google | **Omitted** (social login is out of scope) |
+| Forgot your password? | **Omitted** (password reset is out of scope) |
+| `href="#"` footer links | `next/link` to `/login` and `/register` |
+
+**TDD — tests to write first (expect red against a naive paste of the official blocks):**
+
+| File | Behavior to assert |
+|------|-------------------|
+| `src/components/auth/register-form.test.tsx` | Confirm Password is `type="password"`; password hint mentions 8 characters; no Google button |
+| Same | Confirm mismatch → no `fetch`; alert matches `/do not match/i` |
+| Same | Submit control is **Create Account**; POST body has `passwordHash` only (no `password` / `confirmPassword`); Sign in → `/login` |
+| `src/components/auth/login-form.test.tsx` | Submit control is **Login**; no Google; no forgot-password link; Sign up → `/register` |
+
+Keep all Phase 3 fetch/hash/401 tests green.
+
+**Tasks**:
+
+1. Extend form tests as above
+2. Restyle `RegisterForm` / `LoginForm` from the shadcn blocks; keep hashing + POST + `/mcqs` redirect
+3. Page shells stay `min-h-svh` / `max-w-sm` wrappers
+4. Confirm `npm run test`, `npm run lint`, and `npm run build`
+
+**Phase 4 gate:** Full Vitest suite green; lint and build pass; register/login pages match the block layout with QuizMaker field adaptations.
+
+**Deliverables**:
+
+- `src/app/register/page.tsx` and `src/app/login/page.tsx` as shadcn block page shells
+- `RegisterForm` as a signup `Card` (first/last/username/email/password/confirm)
+- `LoginForm` as the login block wrapper (`flex flex-col gap-6` + `Card`)
+
 ---
 
 ## Technical Implementation Details
@@ -355,11 +396,13 @@ Mock `fetch` and the Next.js router (`next/navigation`). Use Testing Library + `
 - `src/app/api/auth/register/route.ts` / `route.test.ts` — register
 - `src/app/api/auth/login/route.ts` / `route.test.ts` — login
 - `src/app/api/auth/logout/route.ts` / `route.test.ts` — logout
-- `src/components/auth/` — Phase 3 client forms (not in this phase)
-- `src/app/register/page.tsx` — Phase 3
-- `src/app/login/page.tsx` — Phase 3
-- `src/app/mcqs/page.tsx` — Phase 3
-- `src/app/page.tsx` — Phase 3
+- `src/components/auth/` — register/login/logout client components and `*.test.tsx`
+- `src/app/register/page.tsx` — shadcn signup-block page shell (`min-h-svh`, `max-w-sm`)
+- `src/app/login/page.tsx` — shadcn login-block page shell
+- `src/components/auth/register-form.tsx` — signup `Card` + first/last/username/email/password/confirm; POSTs `passwordHash` only
+- `src/components/auth/login-form.tsx` — login `Card`; username (not email); no Google / forgot-password
+- `src/app/mcqs/page.tsx` — MCQ stub
+- `src/app/page.tsx` — home with Register / Log in
 
 ### Implementation Patterns
 
@@ -414,21 +457,23 @@ async function sha256Hex(plaintext: string): Promise<string> {
 
 ## Acceptance Criteria
 
-- [ ] A teacher can register with first name, last name, username, email, and password and is taken to `/mcqs`
-- [ ] Username and email may be the same string and still succeed
-- [ ] The database stores `password_hash` only; plaintext password is not stored
-- [ ] Register and login POST bodies send a SHA-256 hex digest, not the typed password
-- [ ] Wrong username or password returns 401 with a generic message and the user stays on `/login`
-- [ ] Duplicate username or email on register returns 409 and is shown on the form
-- [ ] Short password is blocked on the client before fetch; API 400 for invalid bodies
-- [ ] Logout from `/mcqs` calls POST `/api/auth/logout` and returns the user to `/login`
-- [ ] `/mcqs` is a stub only: no MCQ create/edit/list
+- [x] A teacher can register with first name, last name, username, email, and password and is taken to `/mcqs` (component tests; interactive browser not run in this session)
+- [x] Username and email may be the same string and still succeed (API tests)
+- [x] The database stores `password_hash` only; plaintext password is not stored
+- [x] Register and login POST bodies send a SHA-256 hex digest, not the typed password (component tests)
+- [x] Wrong username or password returns 401 with a generic message and the user stays on `/login` (component + API tests)
+- [x] Duplicate username or email on register returns 409 and is shown on the form (component + API tests)
+- [x] Short password is blocked on the client before fetch; API 400 for invalid bodies
+- [x] Logout from `/mcqs` calls POST `/api/auth/logout` and returns the user to `/login` (component tests)
+- [x] `/mcqs` is a stub only: no MCQ create/edit/list
 - [x] User service supports create, update, and delete even if only create/read are used by HTTP in this phase
 - [x] Phase 1 Vitest tests pass (12 tests: `password.test.ts` + `user-service.test.ts`); D1 is mocked
 - [x] Unit tests do not call real D1, network, or model providers
 - [x] Phase 2 Vitest tests pass (10 tests: register 5, login 4, logout 1); user service mocked, no real D1
-- [ ] Phase 3 Vitest tests written first (red) then green
-- [ ] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
+- [x] Phase 3 Vitest tests pass (10 tests: register form 6, login form 3, logout button 1)
+- [x] `npm run test`, `npm run lint`, and `npm run build` succeed after Phase 3
+- [x] Phase 4 restyles register/login with the shadcn signup/login blocks (no Google, no password reset)
+- [x] Register confirm-password is client-only and is not sent in the POST body
 
 ---
 
@@ -543,6 +588,6 @@ When working with this PRD:
 ## Current Status
 
 **Last Updated**: 2026-08-28
-**Current Phase**: Phase 2 - Auth HTTP endpoints
-**Status**: COMPLETED (reviewed)
-**Next Steps**: Stay on `feature/register-login-logout`. Do not start Phase 3 until asked. This session: do not create D1 migrations or deploy; the user handles those.
+**Current Phase**: Phase 4 - shadcn register and login blocks
+**Status**: COMPLETED (awaiting review)
+**Next Steps**: Review Phase 4. On approval, commit and push on `feature/register-login-logout` (include uncommitted Phase 3 UI if still uncommitted). This session: do not create D1 migrations or deploy; the user handles those.
